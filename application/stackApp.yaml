@@ -1,0 +1,79 @@
+version: '3'
+
+services:
+  adminer:
+    image: adminer
+    ports:
+      - "8081:8080"
+    networks:
+      - mynet2
+  storeDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    volumes:
+    - dbdata:/var/lib/mysql
+    networks:
+      - mynet2
+  storeDBMigration:
+    image: storedbmigration
+    environment:
+      - DATABASE_URL=storeDB
+    networks:
+      - mynet2
+  redis:
+    image: redis
+    ports:
+    - "6379:6379"
+    networks:
+      - redisnet
+  daemon:
+    image: daemon
+    environment:
+      - DATABASE_URL=storeDB
+    networks:
+      - redisnet
+      - mynet2
+  warehouse:
+    image: warehouse
+    ports:
+      - "5001:5001"
+    networks:
+      - redisnet
+    deploy:
+      replicas: 3
+  customer:
+    image: customer
+    environment:
+      - DATABASE_URL=storeDB
+    ports:
+    - "5002:5002"
+    networks:
+      - mynet2
+    deploy:
+      replicas: 3
+  admin:
+    image: admin
+    environment:
+      - DATABASE_URL=storeDB
+    ports:
+    - "5003:5003"
+    networks:
+      - mynet2
+
+
+
+volumes:
+  dbdata:
+
+networks:
+  mynet2:
+    driver: overlay
+  redisnet:
+    driver: overlay

@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - mynet1
+  authenticationDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    ports:
+      - "3306:3306"
+    volumes:
+    - dbdata:/var/lib/mysql
+    networks:
+      - mynet1
+  authenticationDBMigration:
+    image: authenticationdbmigration
+    environment:
+      - DATABASE_URL=authenticationDB
+    networks:
+      - mynet1
+  authentication:
+    image: authentication
+    environment:
+      - DATABASE_URL=authenticationDB
+    ports:
+    - "5000:5000"
+    networks:
+      - mynet1
+
+volumes:
+  dbdata:
+
+networks:
+  mynet1:
+    driver: overlay

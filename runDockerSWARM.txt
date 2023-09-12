@@ -1,0 +1,112 @@
+cd application
+docker build -t customer -f customer.dockerfile .
+docker build -t daemon -f daemon.dockerfile .
+docker build -t admin -f admin.dockerfile .
+docker build -t warehouse -f warehouse.dockerfile .
+docker build -t storedbmigration -f storeDBMigration.dockerfile .
+
+docker-compose -f deployment.yaml up
+
+
+cd authentication
+docker build -t authentication authentication.dockerfile .
+docker build -t authenticationdbmigration authenticationDBMigration.dockerfile .
+
+docker-compose deployment.yaml up
+
+
+
+docker rm -f $(docker ps -a -q)
+docker rmi $(docker images -a -q)
+docker volume rm $(docker volume ls -q)
+docker images -a
+docker service rm $(docker service ls -q)
+
+
+
+cd 'C:\Users\Mladen\Desktop\Docker Swarm\'
+
+
+.\docker-machine-Windows-i386.exe create manager --virtualbox-no-vtx-check
+.\docker-machine-Windows-i386.exe create worker0 --virtualbox-no-vtx-check
+.\docker-machine-Windows-i386.exe create worker1 --virtualbox-no-vtx-check
+.\docker-machine-Windows-i386.exe ssh manager
+docker swarm init
+docker swarm init --advertise-addr IPADD //MOZDA
+
+kopiramo komandu za join
+
+**new window**
+.\docker-machine-Windows-i386.exe ssh worker0
+JOIN KOMANDA
+
+**new window**
+.\docker-machine-Windows-i386.exe ssh worker1
+JOIN KOMANDA
+
+
+#provera da li je sve okej
+.\docker-machine-Windows-i386.exe ssh manager
+docker node ls
+
+
+.\docker-machine-Windows-i386.exe ip manager
+UZMEMO ADRESU I POSTAVIMO U DOCKER ENGINE
+
+"insecure-registries": ["IPADD:PORT"]
+
+
+.\docker-machine-Windows-i386.exe ssh manager
+sudo su
+cd /var/lib/boot2docker
+ls
+vi profile
+
+EXTRA_ARGS='
+--label
+--insecure-registry IPADD:PORT
+
+exit
+
+.\docker-machine-Windows-i386.exe restart manager
+.\docker-machine-Windows-i386.exe ssh manager
+
+docker service create --name registry --replicas 1 --publish 5000:5000 registry:2
+docker service ls
+
+BROWSER
+
+IPAD:5000/v2/_catalog
+
+
+**Pokrenemo iz PyCharm kreiranje image**
+
+docker image ls
+
+**for all images**
+docker tag STARITAG 192.168.99.100:5000/STARITAG
+docker push 192.168.99.100:5000/STARITAG
+
+BROWSER TREBA DA IMA IMAGES
+
+ako su sve tu, radimo pull
+
+**for all images**
+docker pull 192.168.99.100:5000/STARITAG
+
+*vracamo tagove*
+docker tag 192.168.99.100:5000/STARITAG STARITAG
+
+
+cp PUTANJA DO STACK.yaml stackAuth.yaml
+cp PUTANJA DO STACK.yaml stackApp.yaml
+ 
+
+docker stack deploy --compose-file stackAuth.yaml auth_stack
+docker stack deploy --compose-file stackApp.yaml app_stack
+
+
+
+
+docker service ls
+

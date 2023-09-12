@@ -1,12 +1,11 @@
 import json
 import re
-from flask import Flask, request, Response, jsonify
+from flask import request, Response, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, \
     get_jwt
 from sqlalchemy import and_
-from authentication.configuration import Configuration
-from authentication.settings import application, database
-from models import User, UserRole, Role
+from settings import application, database
+from models import User, UserRole
 from adminDecorator import roleCheck
 
 

@@ -1,6 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy;
-
-from authentication.settings import database
+from settings import database
 
 
 class UserRole ( database.Model ):
